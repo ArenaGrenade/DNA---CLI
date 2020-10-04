@@ -46,7 +46,7 @@ def prompt(con):
 
             ch = int(input("Enter your choice> "))
             tmp = sp.call('clear', shell=True)
-            if ch == 2:
+            if ch == 3:
                 return
             else:
                 # Handle the option select
