@@ -46,6 +46,7 @@ def prompt(con):
             print("{index}.  Logout".format(index = index + 2))
 
             ch = int(input("Enter your choice> "))
+            
             _ = sp.call('clear', shell=True)
             if ch == index + 2:
                 return
