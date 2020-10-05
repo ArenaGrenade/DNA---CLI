@@ -52,10 +52,5 @@ def prompt(con):
                 return
             else:
                 # Handle the option select
-                status = options.do_job(ch, cur, con)
-
-                if status is not False:
-                    print("\nOperation Complete.")
-                else:
-                    print("")
+                options.do_job(ch, cur, con)
                 _ = input("Enter any key to continue...")

@@ -1,10 +1,11 @@
+from tabulate import tabulate
+
 def do_job(option, cur, con):
-    return (switcher.get(option, invalid_op))[0](cur, con)
+    (switcher.get(option, invalid_op))[0](cur, con)
 
 
 def option1(cur, con):
     print("you are at option 1. Works na")
-    return True
 
 def option2(cur, con):
 	# print("you are at option 1. Works na")
@@ -43,7 +44,6 @@ def option2(cur, con):
 		con.rollback()
 		print("Failed to insert into database")
 		print(">>>>>>>>>>>>>", e)
-	return True
 
 def option3(cur, con):
 	# print("you are at option 1. Works na")
@@ -72,7 +72,6 @@ def option3(cur, con):
 		con.rollback()
 		print("Failed to edit into database")
 		print(">>>>>>>>>>>>>", e)
-	return True
 
 def option4(cur, con):
 	# print("you are at option 1. Works na")
@@ -99,11 +98,9 @@ def option4(cur, con):
 		con.rollback()
 		print("Failed to edit into database")
 		print(">>>>>>>>>>>>>", e)
-	return True
 
 def invalid_opfunc(cur, con):
     print("You have selected an invalid operation.")
-    return False
 
 def option5(cur, con):
 	# print("you are at option 1. Works na")
@@ -132,7 +129,6 @@ def option5(cur, con):
 		con.rollback()
 		print("Failed to insert into database")
 		print(">>>>>>>>>>>>>", e)
-	return True
 
 def option6(cur, con):
 	# print("you are at option 1. Works na")
@@ -159,7 +155,6 @@ def option6(cur, con):
 		con.rollback()
 		print("Failed to edit into database")
 		print(">>>>>>>>>>>>>", e)
-	return True
 
 def option7(cur, con):
 	# print("you are at option 1. Works na")
@@ -180,7 +175,6 @@ def option7(cur, con):
 		con.rollback()
 		print("Failed to edit into database")
 		print(">>>>>>>>>>>>>", e)
-	return True
 
 def option8(cur, con):
 	# print("you are at option 1. Works na")
@@ -208,7 +202,6 @@ def option8(cur, con):
 		con.rollback()
 		print("Failed to insert into database")
 		print(">>>>>>>>>>>>>", e)
-	return True
 
 def option9(cur, con):
 	# print("you are at option 1. Works na")
@@ -234,7 +227,6 @@ def option9(cur, con):
 		con.rollback()
 		print("Failed to edit into database")
 		print(">>>>>>>>>>>>>", e)
-	return True
 
 def option10(cur, con):
 	# print("you are at option 1. Works na")
@@ -257,7 +249,6 @@ def option10(cur, con):
 		con.rollback()
 		print("Failed to edit into database")
 		print(">>>>>>>>>>>>>", e)
-	return True
 
 def option11(cur, con):
 	# print("you are at option 1. Works na")
@@ -283,7 +274,6 @@ def option11(cur, con):
 		con.rollback()
 		print("Failed to insert into database")
 		print(">>>>>>>>>>>>>", e)
-	return True
 
 def option12(cur, con):
 	# print("you are at option 1. Works na")
@@ -310,7 +300,6 @@ def option12(cur, con):
 		con.rollback()
 		print("Failed to insert into database")
 		print(">>>>>>>>>>>>>", e)
-	return True
 
 def option13(cur, con):
 	# print("you are at option 1. Works na")
@@ -335,7 +324,26 @@ def option13(cur, con):
 		con.rollback()
 		print("Failed to insert into database")
 		print(">>>>>>>>>>>>>", e)
-	return True
+
+def rankCustomersOnOrders(cur, con):
+	try:
+		# some code here
+		query = "SELECT ORDERS.CUSTOMER_ID AS CID, CUSTOMERS.NAME, COUNT(ORDERS.ID) "\
+				"FROM ORDERS "\
+				"INNER JOIN CUSTOMERS ON ORDERS.CUSTOMER_ID=CUSTOMERS.ID "\
+				"GROUP BY ORDERS.CUSTOMER_ID "\
+				"ORDER BY COUNT(CUSTOMERS.ID) DESC"
+		cur.execute(query)
+
+		table = [[row["CID"], row["NAME"], row["COUNT(ORDERS.ID)"]] for row in cur]
+
+		print(tabulate(table, headers=["Customer", "Name", "Number of Orders"]))
+
+		print("Completed Retrieval of Data.")
+	except Exception as e:
+		con.rollback()
+		print("Failed to get data from database")
+		print(">>>>>>>>>>>>>", e)
 
 
 switcher = {
@@ -351,7 +359,8 @@ switcher = {
     10: [option10, "Remove Customer"],
     11: [option11, "Add an employee Address"],
     12: [option12, "Add an employee dependent"],
-    13: [option13, "Add a customer profile"]
+    13: [option13, "Add a customer profile"],
+	14: [rankCustomersOnOrders, "Get an Descending order of customers based on orders made"],
 }
 
 invalid_op = [invalid_opfunc, "Invalid Operation"]
