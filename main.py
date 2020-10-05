@@ -2,13 +2,14 @@ import getopt
 import sys
 import cli
 import subprocess as sp
+from dotenv import load_dotenv
 
 def main(argv):
-    tmp = sp.call('clear', shell=True);
+    _ = sp.call('clear', shell=True)
     tries = 10
 
     try:
-        opts, args = getopt.getopt(argv, "t", ["tries="])
+        opts, _ = getopt.getopt(argv, "t", ["tries="])
     except getopt.GetoptError:
         print("cli.py -t <tries>")
         sys.exit(2)
@@ -29,4 +30,5 @@ def main(argv):
         sys.exit(1)
 
 if __name__ == '__main__':
+    load_dotenv()
     main(sys.argv[1:])
