@@ -108,18 +108,24 @@ def option5(cur, con):
 	try:
 		row = {}
 		print("Enter new order details: ")
+		row["EMPLOYEE_ID"] = input("Employee id: ")
 		row["ID"] = input("ID: ")
 		row["NAME"] = input("NAME: ")
-		row["VOLUME"] = input("VOLUME: ")
-		row["WEIGHT"] = input("WEIGHT: ")
+		row["VOLUME"] = float(input("VOLUME: "))
+		row["WEIGHT"] = float(input("WEIGHT: "))
 		row["STATUS"] = input("STATUS: ")
 		row["CUSTOMER_ID"] = input("CUSTOMER_ID: ")
 		row["PLACED_ON"] = input("Order Date (YYYY-MM-DD): ")
 
-		query = "INSERT INTO ORDERS(ID, NAME, VOLUME, WEIGHT, STATUS, CUSTOMER_ID, PLACED_ON) VALUES('%s', '%s', '%s', '%s', '%s', '%s', '%s')" % (
-			row["ID"], row["NAME"], row["VOLUME"], row["WEIGHT"], row["STATUS"], row["CUSTOMER_ID"], row["PLACED_ON"])
+		query = "INSERT INTO ORDERS(ID, NAME, VOLUME, WEIGHT, STATUS, CUSTOMER_ID, PLACED_ON, DELIVERY_COST) VALUES('%s', '%s', '%f', '%f', '%s', '%s', '%s', %f)" % (
+			row["ID"], row["NAME"], row["VOLUME"], row["WEIGHT"], row["STATUS"], row["CUSTOMER_ID"], row["PLACED_ON"], (row["VOLUME"]*row["WEIGHT"])/100)
 
 		print(query)
+		cur.execute(query)
+
+		query = "INSERT INTO ORDER_PLACEMENT(CUSTOMER_ID, EMPLOYEE_ID, ORDER_ID) VALUES('%s', '%s', '%s')" % (
+			row["CUSTOMER_ID"], row["EMPLOYEE_ID"], row["ID"])
+
 		cur.execute(query)
 		con.commit()
 
@@ -163,7 +169,11 @@ def option7(cur, con):
 		row = {}
 		row["ID"] = input("Enter ORDER ID: ")
 
-		query = "DELETE FROM ORDER WHERE ID = %s"
+		query = "DELETE FROM ORDERS WHERE ID = %s"
+		val = (row["ID"])
+		print(query)
+		cur.execute(query, val)
+		query = "DELETE FROM ORDER_PLACEMENT WHERE ORDER_ID = %s"
 		val = (row["ID"])
 		print(query)
 		cur.execute(query, val)
@@ -177,6 +187,30 @@ def option7(cur, con):
 		print(">>>>>>>>>>>>>", e)
 
 def option8(cur, con):
+	# print("you are at option 1. Works na")
+	# return True
+	try:
+		row = {}
+		row["ID"] = input("Enter ORDER ID: ")
+		row["FROM_BRANCH_ID"] = input("Enter dispatching branch ID: ")
+		row["TO_BRANCH_ID"] = input("Enter arriving branch ID: ")
+
+		query = "UPDATE ORDERS SET STATUS='DELIVERED' WHERE ID = %s"
+		val = (row["ID"])
+		cur.execute(query, val)
+		query = "INSERT INTO ORDER_SHIPPING(TO_BRANCH_ID, FROM_BRANCH_ID, ORDER_ID) VALUES(%s, %s, %s)"
+		val = (row["TO_BRANCH_ID"], row["FROM_BRANCH_ID"], row["ID"])
+		cur.execute(query, val)
+		con.commit()
+
+		print("Edited Database")
+
+	except Exception as e:
+		con.rollback()
+		print("Failed to edit into database")
+		print(">>>>>>>>>>>>>", e)
+
+def option9(cur, con):
 	# print("you are at option 1. Works na")
 	# return True
 	try:
@@ -203,7 +237,7 @@ def option8(cur, con):
 		print("Failed to insert into database")
 		print(">>>>>>>>>>>>>", e)
 
-def option9(cur, con):
+def option10(cur, con):
 	# print("you are at option 1. Works na")
 	# return True
 	try:
@@ -228,7 +262,7 @@ def option9(cur, con):
 		print("Failed to edit into database")
 		print(">>>>>>>>>>>>>", e)
 
-def option10(cur, con):
+def option11(cur, con):
 	# print("you are at option 1. Works na")
 	# return True
 	try:
@@ -250,7 +284,7 @@ def option10(cur, con):
 		print("Failed to edit into database")
 		print(">>>>>>>>>>>>>", e)
 
-def option11(cur, con):
+def option12(cur, con):
 	# print("you are at option 1. Works na")
 	# return True
 	try:
@@ -275,7 +309,7 @@ def option11(cur, con):
 		print("Failed to insert into database")
 		print(">>>>>>>>>>>>>", e)
 
-def option12(cur, con):
+def option13(cur, con):
 	# print("you are at option 1. Works na")
 	# return True
 	try:
@@ -301,7 +335,7 @@ def option12(cur, con):
 		print("Failed to insert into database")
 		print(">>>>>>>>>>>>>", e)
 
-def option13(cur, con):
+def option14(cur, con):
 	# print("you are at option 1. Works na")
 	# return True
 	try:
@@ -345,6 +379,59 @@ def rankCustomersOnOrders(cur, con):
 		print("Failed to get data from database")
 		print(">>>>>>>>>>>>>", e)
 
+def option15(cur, con):
+	try:
+		row = {}
+		row["EMPLOYEE_ID"] = input("Employee id: ")
+		row["YEAR"] = input("Year(YYYY): ")
+		row["MONTH"] = input("Month(MM): ")
+		# some code here
+		query = "SELECT SUM(DELIVERY_COST) FROM ((EMPLOYEE INNER JOIN ORDER_PLACEMENT on ORDER_PLACEMENT.EMPLOYEE_ID = EMPLOYEE.ID) INNER JOIN ORDERS on ORDER_PLACEMENT.ORDER_ID = ORDERS.ID) WHERE PLACED_ON LIKE '%s-__-__' AND EMPLOYEE_ID='%s'"%(row["YEAR"],row["EMPLOYEE_ID"])
+		cur.execute(query)
+
+		table = [[row["SUM(DELIVERY_COST)"]] for row in cur]
+
+		print(tabulate(table, headers=["Yearly Income", "date"]))
+
+		query = "SELECT SUM(DELIVERY_COST) FROM ((EMPLOYEE INNER JOIN ORDER_PLACEMENT on ORDER_PLACEMENT.EMPLOYEE_ID = EMPLOYEE.ID) INNER JOIN ORDERS on ORDER_PLACEMENT.ORDER_ID = ORDERS.ID) WHERE PLACED_ON LIKE '%s-%s-__' AND EMPLOYEE_ID='%s'"%(row["YEAR"],row["MONTH"], row["EMPLOYEE_ID"])
+		cur.execute(query)
+
+		table = [[row["SUM(DELIVERY_COST)"]] for row in cur]
+
+		print(tabulate(table, headers=["Monthly Income for month %s"%(row["MONTH"]), "date"]))
+
+		print("Completed Retrieval of Data.")
+	except Exception as e:
+		con.rollback()
+		print("Failed to get data from database")
+		print(">>>>>>>>>>>>>", e)
+
+def option16(cur, con):
+	try:
+		row = {}
+		row["YEAR"] = input("Year(YYYY): ")
+		row["MONTH"] = input("Month(MM): ")
+		# some code here
+		query = "SELECT COUNT(*) FROM ORDERS WHERE PLACED_ON LIKE '%s-__-__' "%(row["YEAR"])
+		cur.execute(query)
+
+		table = [[row["COUNT(*)"]] for row in cur]
+
+		print(tabulate(table, headers=["Yearly Orders", "date"]))
+		query = "SELECT COUNT(*) FROM ORDERS WHERE PLACED_ON LIKE '%s-%s-__' "%(row["YEAR"], row["MONTH"])
+
+		cur.execute(query)
+
+		table = [[row["COUNT(*)"]] for row in cur]
+
+		print(tabulate(table, headers=["Monthly Number of orders for month %s"%(row["MONTH"]), "date"]))
+
+		print("Completed Retrieval of Data.")
+	except Exception as e:
+		con.rollback()
+		print("Failed to get data from database")
+		print(">>>>>>>>>>>>>", e)
+
 
 switcher = {
     1: [option1, "Option 1"],
@@ -354,13 +441,16 @@ switcher = {
     5: [option5, "Add new Order"],
     6: [option6, "Edit Order details"],
     7: [option7, "Remove an Order"],
-    8: [option8, "Add a Customer"],
-    9: [option9, "Edit Customer Details"],
-    10: [option10, "Remove Customer"],
-    11: [option11, "Add an employee Address"],
-    12: [option12, "Add an employee dependent"],
-    13: [option13, "Add a customer profile"],
-	14: [rankCustomersOnOrders, "Get an Descending order of customers based on orders made"],
+    8: [option8, "Assign branches and change delivery status"],
+    9: [option9, "Add a Customer"],
+    10: [option10, "Edit Customer Details"],
+    11: [option11, "Remove Customer"],
+    12: [option12, "Add an employee Address"],
+    13: [option13, "Add an employee dependent"],
+    14: [option14, "Add a customer profile"],
+    15: [option15, "Get monthly and yearly income of an employee"],
+    16: [option16, "Get monthly and yearly order quantity"],
+	17: [rankCustomersOnOrders, "Get an Descending order of customers based on orders made"],
 }
 
 invalid_op = [invalid_opfunc, "Invalid Operation"]
