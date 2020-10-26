@@ -1,3 +1,6 @@
+### A command line interface to a logistics company database, done as part of a database and systems course.
+To connect to a database please get the credentials and store them in a .env file in the root directory.
+
 # Command Line Interface
 
 To run the Command Line Interface to the System. Go to the directory where you have cloned this repository and run,
